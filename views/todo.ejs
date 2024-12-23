@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your To-Do List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #007BFF;
+            margin-bottom: 20px;
+        }
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .filters a {
+            padding: 10px 20px;
+            text-decoration: none;
+            color: white;
+            background-color: #007BFF;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .filters a:hover {
+            background-color: #0056b3;
+        }
+        .task-list {
+            list-style: none;
+            padding: 0;
+        }
+        .task {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .task.completed {
+            text-decoration: line-through;
+            color: gray;
+        }
+        .task button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .task .mark-completed {
+            background-color: #28a745;
+            color: white;
+        }
+        .task .mark-completed:hover {
+            background-color: #218838;
+        }
+        .task .delete {
+            background-color: #dc3545;
+            color: white;
+        }
+        .task .delete:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Your To-Do List</h1>
+
+        <!-- New Task Form -->
+        <form action="/todo/create" method="POST">
+            <input type="text" name="taskDescription" placeholder="New task description" required>
+            <button type="submit">Add Task</button>
+        </form>
+
+        <!-- Filters -->
+        <div class="filters">
+            <a href="/todo?filter=all">All Tasks</a>
+            <a href="/todo?filter=pending">Pending</a>
+            <a href="/todo?filter=completed">Completed</a>
+        </div>
+
+        <!-- Task List -->
+        <ul class="task-list">
+            <% tasks.forEach(task => { %>
+                <li class="task <%= task.status === 'completed' ? 'completed' : '' %>">
+                    <span><%= task.taskDescription %></span>
+                    <div>
+                        <% if (task.status !== 'completed') { %>
+                            <form action="/todo/<%= task._id %>/status?_method=PUT" method="POST" style="display: inline;">
+                                <input type="hidden" name="_method" value="PUT">
+                                <input type="hidden" name="status" value="completed">
+                                <button class="mark-completed">Mark Completed</button>
+                            </form>
+                            
+                        <% } %>
+                        
+                        <form action="/todo/<%= task._id %>/description?_method=PUT" method="POST" style="display: inline;">
+                            <input type="hidden" name="_method" value="PUT">
+                            <textarea name="taskDescription" rows="2" cols="60" required><%= task.taskDescription %></textarea>
+                            <button type="submit">Update Description</button>
+                        </form>
+                    
+                        <form action="/todo/<%= task._id %>?_method=DELETE" method="POST" style="display: inline;">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="delete">Delete</button>
+                        </form>
+                                           
+                    </div>
+                </li>
+            <% }) %>
+        </ul>
+
+        <!-- Pagination Controls -->
+        <div class="pagination">
+            <% if (page > 1) { %>
+                <a href="/todo?page=<%= page - 1 %>&limit=<%= limit %>&filter=<%= filter %>">Previous</a>
+            <% } %>
+            <% if (page < totalPages) { %>
+                <a href="/todo?page=<%= page + 1 %>&limit=<%= limit %>&filter=<%= filter %>">Next</a>
+            <% } %>
+        </div>
+
+        <p>Total Tasks: <%= totalTasks %></p>
+    </div>
+</body>
+</html>
